@@ -49,10 +49,9 @@ def main():
     with torch.set_grad_enabled(False):
         videos_dir = os.listdir(os.path.join(DATA_ROOT, VIDEO_FRAMES))
         videos_dir = [dir for dir in videos_dir if 'video' in dir]
-        for dir in videos_dir[0:3]:
+        for dir in videos_dir:
             num_frames = len(os.listdir(os.path.join(DATA_ROOT, VIDEO_FRAMES, dir)))
             num_frames = num_frames - (num_frames % SAMPLE_FRAMES)
-            print(num_frames)
 
             frames = torch.zeros(num_frames//SAMPLE_FRAMES, FEAT_VECT_DIM)
             junk = torch.zeros(num_frames//SAMPLE_FRAMES, 1024)  # optical flow will not be used

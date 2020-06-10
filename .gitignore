@@ -25,3 +25,6 @@ tools/**/*.json
 tools/**/**/*.json
 tools/**/**/**/*.json
 
+.idea
+data
+venv
