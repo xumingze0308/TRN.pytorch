@@ -22,12 +22,11 @@ def main():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     model = models.vgg16(pretrained=True)
-    model = nn.Sequential(
-        *list(model.children())[:-1],
-        Flatten(),     # feat_vect_dim: 512*7*7
-    ).to(device)
+    model.classifier = model.classifier[:2]  # take output of fc6 layer
+    FEAT_VECT_DIM = model.classifier[0].out_features   # 4096
+
+    model = model.to(device)
     model.train(False)
-    FEAT_VECT_DIM = 512*7*7
 
     transform = transforms.Compose([
         transforms.ToTensor(),
