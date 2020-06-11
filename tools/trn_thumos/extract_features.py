@@ -61,7 +61,7 @@ def main():
                 frame = Image.open(os.path.join(DATA_ROOT, VIDEO_FRAMES, dir, str(idx_frame+1)+'.jpg')).convert('RGB')
                 frame = transform(frame).to(device)
                 # forward pass
-                feat_vect = model(frame.unsqueeze(0))
+                feat_vect = model(frame.unsqueeze(0))   # TODO: load a batch instead of a single sample
                 frames[count] = feat_vect.squeeze(0)
 
                 count += 1

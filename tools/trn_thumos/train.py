@@ -17,7 +17,7 @@ def main(args):
     save_dir = osp.join(this_dir, 'checkpoints')
     if not osp.isdir(save_dir):
         os.makedirs(save_dir)
-    command = 'python ' + ' '.join(sys.argv)
+    command = '\n\npython ' + ' '.join(sys.argv)
     logger = utl.setup_logger(osp.join(this_dir, 'log.txt'), command=command)
     os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
