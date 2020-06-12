@@ -54,13 +54,13 @@ def main(args):
         }
 
         enc_losses = {phase: 0.0 for phase in args.phases}
-        enc_score_metrics = []
-        enc_target_metrics = []
-        enc_mAP = 0.0
+        enc_score_metrics = {phase: [] for phase in args.phases}
+        enc_target_metrics = {phase: [] for phase in args.phases}
+        enc_mAP = {phase: 0.0 for phase in args.phases}
         dec_losses = {phase: 0.0 for phase in args.phases}
-        dec_score_metrics = []
-        dec_target_metrics = []
-        dec_mAP = 0.0
+        dec_score_metrics = {phase: [] for phase in args.phases}
+        dec_target_metrics = {phase: [] for phase in args.phases}
+        dec_mAP = {phase: 0.0 for phase in args.phases}
 
         start = time.time()
         for phase in args.phases:
@@ -96,41 +96,41 @@ def main(args):
                         loss = enc_loss + dec_loss
                         loss.backward()
                         optimizer.step()
-                    else:
-                        # Prepare metrics for encoder
-                        enc_score = softmax(enc_score).cpu().numpy()
-                        enc_target = enc_target.cpu().numpy()
-                        enc_score_metrics.extend(enc_score)
-                        enc_target_metrics.extend(enc_target)
-                        # Prepare metrics for decoder
-                        dec_score = softmax(dec_score).cpu().numpy()
-                        dec_target = dec_target.cpu().numpy()
-                        dec_score_metrics.extend(dec_score)
-                        dec_target_metrics.extend(dec_target)
+
+                    # Prepare metrics for encoder
+                    enc_score = softmax(enc_score).cpu().detach().numpy()
+                    enc_target = enc_target.cpu().detach().numpy()
+                    enc_score_metrics[phase].extend(enc_score)
+                    enc_target_metrics[phase].extend(enc_target)
+                    # Prepare metrics for decoder
+                    dec_score = softmax(dec_score).cpu().detach().numpy()
+                    dec_target = dec_target.cpu().detach().numpy()
+                    dec_score_metrics[phase].extend(dec_score)
+                    dec_target_metrics[phase].extend(dec_target)
         end = time.time()
 
         if args.debug:
-            result_file = 'inputs-{}-epoch-{}.json'.format(args.inputs, epoch)
+            result_file = {phase: 'phase-{}-epoch.json'.format(phase, epoch) for phase in args.phases}
             # Compute result for encoder
-            enc_mAP = utl.compute_result_multilabel(
+            enc_mAP = {phase: utl.compute_result_multilabel(
                 args.class_index,
-                enc_score_metrics,
-                enc_target_metrics,
+                enc_score_metrics[phase],
+                enc_target_metrics[phase],
                 save_dir,
-                result_file,
+                result_file[phase],
                 ignore_class=[0,21],
                 save=True,
-            )
+            ) for phase in args.phases}
             # Compute result for decoder
-            dec_mAP = utl.compute_result_multilabel(
+            dec_mAP = {phase: utl.compute_result_multilabel(
                 args.class_index,
-                dec_score_metrics,
-                dec_target_metrics,
+                dec_score_metrics[phase],
+                dec_target_metrics[phase],
                 save_dir,
                 result_file,
                 ignore_class=[0,21],
                 save=False,
-            )
+            ) for phase in args.phases}
 
         # Output result
         logger.output(epoch, enc_losses, dec_losses,

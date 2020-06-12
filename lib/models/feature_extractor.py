@@ -63,7 +63,7 @@ class THUMOSFeatureExtractor(nn.Module):
         if self.with_camera and self.with_motion:
             self.fusion_size = 2048 + 1024
         elif self.with_camera:
-            self.fusion_size = args.hidden_size   #2048
+            self.fusion_size = 2048
         elif self.with_motion:
             self.fusion_size = 1024
 
