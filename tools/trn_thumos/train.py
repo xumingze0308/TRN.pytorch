@@ -110,7 +110,7 @@ def main(args):
         end = time.time()
 
         if args.debug:
-            result_file = {phase: 'phase-{}-epoch.json'.format(phase, epoch) for phase in args.phases}
+            result_file = {phase: 'phase-{}-epoch-{}.json'.format(phase, epoch) for phase in args.phases}
             # Compute result for encoder
             enc_mAP = {phase: utl.compute_result_multilabel(
                 args.class_index,
