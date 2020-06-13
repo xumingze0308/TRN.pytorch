@@ -13,4 +13,5 @@ def parse_trn_args():
     parser.add_argument('--enc_steps', default=64, type=int)
     parser.add_argument('--dec_steps', default=8, type=int)
     parser.add_argument('--dropout', default=0.1, type=float)
+    parser.add_argument('--downsample_backgr', action='store_true')
     return build_data_info(parser.parse_args())
