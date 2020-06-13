@@ -114,12 +114,12 @@ def main(args):
                     dec_target_metrics[phase].extend(dec_target)
 
                     if training:
-                        writer.add_scalar('Loss/train_enc', enc_loss.item(), batch_idx_train)
-                        writer.add_scalar('Loss/train_dec', dec_loss.item(), batch_idx_train)
+                        writer.add_scalar('Loss_iter/train_enc', enc_loss.item(), batch_idx_train)
+                        writer.add_scalar('Loss_iter/train_dec', dec_loss.item(), batch_idx_train)
                         batch_idx_train += 1
                     else:
-                        writer.add_scalar('Loss/val_enc', enc_loss.item(), batch_idx_test)
-                        writer.add_scalar('Loss/val_dec', dec_loss.item(), batch_idx_test)
+                        writer.add_scalar('Loss_iter/val_enc', enc_loss.item(), batch_idx_test)
+                        writer.add_scalar('Loss_iter/val_dec', dec_loss.item(), batch_idx_test)
                         batch_idx_test += 1
         end = time.time()
 
@@ -146,10 +146,13 @@ def main(args):
                 save=False,
             ) for phase in args.phases}
 
-            writer.add_scalar('mAP/train_enc', enc_mAP['train'], epoch)
-            writer.add_scalar('mAP/train_dec', dec_mAP['train'], epoch)
-            writer.add_scalar('mAP/val_enc', enc_mAP['test'], epoch)
-            writer.add_scalar('mAP/val_dec', dec_mAP['test'], epoch)
+            writer.add_scalars('mAP_epoch/train_val_enc', {phase: enc_mAP[phase] for phase in args.phases}, epoch)
+            writer.add_scalars('mAP_epoch/train_val_dec', {phase: dec_mAP[phase] for phase in args.phases}, epoch)
+
+        writer.add_scalars('Loss_epoch/train_val_enc',
+                           {phase: enc_losses[phase] / len(data_loaders[phase].dataset) for phase in args.phases}, epoch)
+        writer.add_scalars('Loss_epoch/train_val_dec',
+                           {phase: dec_losses[phase] / len(data_loaders[phase].dataset) for phase in args.phases}, epoch)
 
         # Output result
         logger.output(epoch, enc_losses, dec_losses,
