@@ -6,6 +6,7 @@ import time
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from torch.utils.tensorboard import SummaryWriter
 
 import _init_paths
 import utils as utl
@@ -41,6 +42,10 @@ def main(args):
             param_group['lr'] = args.lr
         args.start_epoch += checkpoint['epoch']
     softmax = nn.Softmax(dim=1).to(device)
+
+    writer = SummaryWriter()
+    batch_idx_train = 1
+    batch_idx_test = 1
 
     for epoch in range(args.start_epoch, args.start_epoch + args.epochs):
         if epoch == 21:
@@ -107,6 +112,15 @@ def main(args):
                     dec_target = dec_target.cpu().detach().numpy()
                     dec_score_metrics[phase].extend(dec_score)
                     dec_target_metrics[phase].extend(dec_target)
+
+                    if training:
+                        writer.add_scalar('Loss/train_enc', enc_loss.item(), batch_idx_train)
+                        writer.add_scalar('Loss/train_dec', dec_loss.item(), batch_idx_train)
+                        batch_idx_train += 1
+                    else:
+                        writer.add_scalar('Loss/val_enc', enc_loss.item(), batch_idx_test)
+                        writer.add_scalar('Loss/val_dec', dec_loss.item(), batch_idx_test)
+                        batch_idx_test += 1
         end = time.time()
 
         if args.debug:
@@ -144,6 +158,8 @@ def main(args):
             'model_state_dict': model.module.state_dict() if args.distributed else model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
         }, osp.join(save_dir, checkpoint_file))
+
+    writer.close()
 
 if __name__ == '__main__':
     main(parse_args())

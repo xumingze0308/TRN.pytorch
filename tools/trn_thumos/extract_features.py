@@ -40,7 +40,7 @@ def main():
     VIDEO_FRAMES = 'video_frames_24fps'   # base folder where the video folders (containing the frames) are
     TARGET_FRAMES = 'target_frames_24fps' # labels for the frames above
 
-    VIDEO_FEATURES = 'resnet200-fc'
+    VIDEO_FEATURES = 'vgg16-fc6'
     OPTIC_FEATURES = 'bn_inception'
     TARGET_FEATURES = 'target'
 
