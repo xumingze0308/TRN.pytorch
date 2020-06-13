@@ -146,6 +146,11 @@ def main(args):
                 save=False,
             ) for phase in args.phases}
 
+            writer.add_scalar('mAP/train_enc', enc_mAP['train'], epoch)
+            writer.add_scalar('mAP/train_dec', dec_mAP['train'], epoch)
+            writer.add_scalar('mAP/val_enc', enc_mAP['test'], epoch)
+            writer.add_scalar('mAP/val_dec', dec_mAP['test'], epoch)
+
         # Output result
         logger.output(epoch, enc_losses, dec_losses,
                       len(data_loaders['train'].dataset), len(data_loaders['test'].dataset),

@@ -16,7 +16,8 @@ class TRNTHUMOSDataLayer(data.Dataset):
 
         self.inputs = []
         if not self.training:
-            self.sessions = self.sessions[0:50]
+            #self.sessions = self.sessions[0:50]
+            pass
         for session in self.sessions:
             target = np.load(osp.join(self.data_root, 'target', session+'.npy'))
             seed = np.random.randint(self.enc_steps) if self.training else 0
