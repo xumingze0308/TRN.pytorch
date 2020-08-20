@@ -13,7 +13,7 @@ __all__ = [
 ]
 
 def compute_result_multilabel(class_index, score_metrics, target_metrics, save_dir, result_file,
-                              ignore_class=[0], save=True, verbose=False, smooth=True, switch=True):
+                              ignore_class=[0], save=True, verbose=False, smooth=False, switch=False):
     result = OrderedDict()
     score_metrics = np.array(score_metrics)
     pred_metrics = np.argmax(score_metrics, axis=1)
