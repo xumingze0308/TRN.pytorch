@@ -1,5 +1,9 @@
 # Temporal Recurrent Networks for Online Action Detection
 
+## Updates
+
+:boom: **May 25th 2021**: For future comparison with TRN using Kinetics pretrained features, we report our results on THUMOS as 62.1%, on TVSeries as 86.2%, and on HACS Segment as 78.9%, in terms of mAP.
+
 ## Introduction
 
 This is a PyTorch **reimplementation** for our ICCV 2019 paper "[`Temporal Recurrent Networks for Online Action Detection`](https://arxiv.org/pdf/1811.07391.pdf)".
