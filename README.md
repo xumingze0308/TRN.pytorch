@@ -2,7 +2,9 @@
 
 ## Updates
 
-:boom: **May 25th 2021**: For future comparison with TRN using Kinetics pretrained features, we report our results on THUMOS as 62.1%, on TVSeries as 86.2%, and on HACS Segment as 78.9%, in terms of mAP.
+:boom: **May 25th 2021**: For future comparison with TRN using Kinetics pretrained features, we report our results on THUMOS as 62.1% in mAP, on TVSeries as 86.2% in cAP, and on HACS Segment as 78.9% in mAP.
+
+For feature encoding, we use [`ResNet-50`](https://arxiv.org/pdf/1512.03385.pdf) model for the RGB input, and the [`BN-Inception`](https://arxiv.org/pdf/1502.03167.pdf) model for the optical flow input. To replicate our results, please use the pretrained weights of ResNet-50 in [`MMAction2`](https://github.com/open-mmlab/mmaction2/blob/master/configs/recognition/tsn/README.md#kinetics-400) and BN-Inception in this [`repo`](http://yjxiong.me/others/kinetics_action/).
 
 ## Introduction
 
