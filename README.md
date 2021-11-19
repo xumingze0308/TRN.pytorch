@@ -2,6 +2,8 @@
 
 ## Updates
 
+:boom: **November 18th 2021**: The code of [`Long Short-Term Transformer (LSTR)`](https://arxiv.org/pdf/2107.03377.pdf) is released [`here`](https://github.com/amazon-research/long-short-term-transformer).
+
 :boom: **July 08th 2021**: We are releasing [`Long Short-Term Transformer (LSTR)`](https://arxiv.org/pdf/2107.03377.pdf), a more effective and efficient method for modeling prolonged sequence data! [`LSTR`](https://arxiv.org/pdf/2107.03377.pdf) achieves SoTA on Online Action Detection benchmarks.
 
 :boom: **May 25th 2021**: For future comparison with TRN using Kinetics pretrained features, we report our results on THUMOS as 62.1% in mAP, on TVSeries as 86.2% in cAP, and on HACS Segment as 78.9% in mAP.
