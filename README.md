@@ -22,6 +22,8 @@ This is a PyTorch **reimplementation** for our ICCV 2019 paper "[`Temporal Recur
 
 ## Data Preparation
 
+#### Option1: Prepare the features and targets by yourself.
+
 1. Download the [`HDD`](https://usa.honda-ri.com/hdd) and [`THUMOS'14`](https://www.crcv.ucf.edu/THUMOS14/) datasets.
 
 2. Extract feature representations for video frames.
@@ -61,6 +63,10 @@ This is a PyTorch **reimplementation** for our ICCV 2019 paper "[`Temporal Recur
     |   ├── video_validation_0000051.npy (of size L x 22)
     |   ├── ...
     ```
+    
+#### Option2: Directly download the pre-extracted features and targets from TeSTra.
+
+You can skip the step of 1, 2, 3 above and directly use the pre-extracted features and targets from [TeSTra](https://github.com/zhaoyue-zephyrus/TeSTra). They extactly follow our data structure and should be able to reproduce TRN's performance. However, if you have any question about the processing of these features and targets, please contact the authors of TeSTra directly.
 
 4. Create softlinks of datasets:
     ```
