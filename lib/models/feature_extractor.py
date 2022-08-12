@@ -67,8 +67,10 @@ class THUMOSFeatureExtractor(nn.Module):
         elif self.with_motion:
             self.fusion_size = 1024
 
+        FEAT_VECT_DIM = 4096 # for vgg16
+
         self.input_linear = nn.Sequential(
-            nn.Linear(self.fusion_size, self.fusion_size),
+            nn.Linear(FEAT_VECT_DIM , self.fusion_size),
             nn.ReLU(inplace=True),
         )
 

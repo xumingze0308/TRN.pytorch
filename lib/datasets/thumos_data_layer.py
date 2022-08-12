@@ -15,12 +15,22 @@ class TRNTHUMOSDataLayer(data.Dataset):
         self.training = phase=='train'
 
         self.inputs = []
+        if not self.training:
+            self.sessions = self.sessions[0:50]
+            pass
         for session in self.sessions:
             target = np.load(osp.join(self.data_root, 'target', session+'.npy'))
             seed = np.random.randint(self.enc_steps) if self.training else 0
             for start, end in zip(
                 range(seed, target.shape[0] - self.dec_steps, self.enc_steps),
                 range(seed + self.enc_steps, target.shape[0] - self.dec_steps, self.enc_steps)):
+
+                if args.downsample_backgr and self.training:
+                    background_vect = np.zeros_like(target[start:end])
+                    background_vect[:, 0] = 1
+                    if (target[start:end] == background_vect).all():
+                        continue
+
                 enc_target = target[start:end]
                 dec_target = self.get_dec_target(target[start:end + self.dec_steps])
                 self.inputs.append([

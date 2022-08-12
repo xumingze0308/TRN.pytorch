@@ -6,6 +6,7 @@ import time
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from torch.utils.tensorboard import SummaryWriter
 
 import _init_paths
 import utils as utl
@@ -17,7 +18,7 @@ def main(args):
     save_dir = osp.join(this_dir, 'checkpoints')
     if not osp.isdir(save_dir):
         os.makedirs(save_dir)
-    command = 'python ' + ' '.join(sys.argv)
+    command = '\n\npython ' + ' '.join(sys.argv)
     logger = utl.setup_logger(osp.join(this_dir, 'log.txt'), command=command)
     os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -42,6 +43,10 @@ def main(args):
         args.start_epoch += checkpoint['epoch']
     softmax = nn.Softmax(dim=1).to(device)
 
+    writer = SummaryWriter()
+    batch_idx_train = 1
+    batch_idx_test = 1
+
     for epoch in range(args.start_epoch, args.start_epoch + args.epochs):
         if epoch == 21:
             args.lr = args.lr * 0.1
@@ -54,13 +59,13 @@ def main(args):
         }
 
         enc_losses = {phase: 0.0 for phase in args.phases}
-        enc_score_metrics = []
-        enc_target_metrics = []
-        enc_mAP = 0.0
+        enc_score_metrics = {phase: [] for phase in args.phases}
+        enc_target_metrics = {phase: [] for phase in args.phases}
+        enc_mAP = {phase: 0.0 for phase in args.phases}
         dec_losses = {phase: 0.0 for phase in args.phases}
-        dec_score_metrics = []
-        dec_target_metrics = []
-        dec_mAP = 0.0
+        dec_score_metrics = {phase: [] for phase in args.phases}
+        dec_target_metrics = {phase: [] for phase in args.phases}
+        dec_mAP = {phase: 0.0 for phase in args.phases}
 
         start = time.time()
         for phase in args.phases:
@@ -96,41 +101,58 @@ def main(args):
                         loss = enc_loss + dec_loss
                         loss.backward()
                         optimizer.step()
+
+                    # Prepare metrics for encoder
+                    enc_score = softmax(enc_score).cpu().detach().numpy()
+                    enc_target = enc_target.cpu().detach().numpy()
+                    enc_score_metrics[phase].extend(enc_score)
+                    enc_target_metrics[phase].extend(enc_target)
+                    # Prepare metrics for decoder
+                    dec_score = softmax(dec_score).cpu().detach().numpy()
+                    dec_target = dec_target.cpu().detach().numpy()
+                    dec_score_metrics[phase].extend(dec_score)
+                    dec_target_metrics[phase].extend(dec_target)
+
+                    if training:
+                        writer.add_scalar('Loss_iter/train_enc', enc_loss.item(), batch_idx_train)
+                        writer.add_scalar('Loss_iter/train_dec', dec_loss.item(), batch_idx_train)
+                        batch_idx_train += 1
                     else:
-                        # Prepare metrics for encoder
-                        enc_score = softmax(enc_score).cpu().numpy()
-                        enc_target = enc_target.cpu().numpy()
-                        enc_score_metrics.extend(enc_score)
-                        enc_target_metrics.extend(enc_target)
-                        # Prepare metrics for decoder
-                        dec_score = softmax(dec_score).cpu().numpy()
-                        dec_target = dec_target.cpu().numpy()
-                        dec_score_metrics.extend(dec_score)
-                        dec_target_metrics.extend(dec_target)
+                        writer.add_scalar('Loss_iter/val_enc', enc_loss.item(), batch_idx_test)
+                        writer.add_scalar('Loss_iter/val_dec', dec_loss.item(), batch_idx_test)
+                        batch_idx_test += 1
         end = time.time()
 
         if args.debug:
-            result_file = 'inputs-{}-epoch-{}.json'.format(args.inputs, epoch)
+            result_file = {phase: 'phase-{}-epoch-{}.json'.format(phase, epoch) for phase in args.phases}
             # Compute result for encoder
-            enc_mAP = utl.compute_result_multilabel(
+            enc_mAP = {phase: utl.compute_result_multilabel(
                 args.class_index,
-                enc_score_metrics,
-                enc_target_metrics,
+                enc_score_metrics[phase],
+                enc_target_metrics[phase],
                 save_dir,
-                result_file,
+                result_file[phase],
                 ignore_class=[0,21],
                 save=True,
-            )
+            ) for phase in args.phases}
             # Compute result for decoder
-            dec_mAP = utl.compute_result_multilabel(
+            dec_mAP = {phase: utl.compute_result_multilabel(
                 args.class_index,
-                dec_score_metrics,
-                dec_target_metrics,
+                dec_score_metrics[phase],
+                dec_target_metrics[phase],
                 save_dir,
                 result_file,
                 ignore_class=[0,21],
                 save=False,
-            )
+            ) for phase in args.phases}
+
+            writer.add_scalars('mAP_epoch/train_val_enc', {phase: enc_mAP[phase] for phase in args.phases}, epoch)
+            writer.add_scalars('mAP_epoch/train_val_dec', {phase: dec_mAP[phase] for phase in args.phases}, epoch)
+
+        writer.add_scalars('Loss_epoch/train_val_enc',
+                           {phase: enc_losses[phase] / len(data_loaders[phase].dataset) for phase in args.phases}, epoch)
+        writer.add_scalars('Loss_epoch/train_val_dec',
+                           {phase: dec_losses[phase] / len(data_loaders[phase].dataset) for phase in args.phases}, epoch)
 
         # Output result
         logger.output(epoch, enc_losses, dec_losses,
@@ -144,6 +166,8 @@ def main(args):
             'model_state_dict': model.module.state_dict() if args.distributed else model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
         }, osp.join(save_dir, checkpoint_file))
+
+    writer.close()
 
 if __name__ == '__main__':
     main(parse_args())
